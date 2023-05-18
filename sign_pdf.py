@@ -116,3 +116,29 @@ def sign_file(input_file: str, signatureID: str, x_coordinate: int,
     print("\n".join("{}:{}".format(i, j) for i, j in summary.items()))
     print("###################################################################")
     return True
+
+# sign all PDF files within a specific folder
+
+
+def sign_folder(**kwargs):
+    input_folder = kwargs.get('input_folder')
+    signatureID = kwargs.get('signatureID')
+    pages = kwargs.get('pages')
+    x_coordinate = int(kwargs.get('x_coordinate'))
+    y_coordinate = int(kwargs.get('y_coordinate'))
+    # Run in recursive mode
+    recursive = kwargs.get('recursive')
+    # Loop though the files within the input folder.
+    for foldername, dirs, filenames in os.walk(input_folder):
+        for filename in filenames:
+            # Check if pdf file
+            if not filename.endswith('.pdf'):
+                continue
+            # PDF File found
+            inp_pdf_file = os.path.join(foldername, filename)
+            print("Processing file =", inp_pdf_file)
+            # Compress Existing file
+            sign_file(input_file=inp_pdf_file, signatureID=signatureID, x_coordinate=x_coordinate,
+                      y_coordinate=y_coordinate, pages=pages, output_file=None)
+        if not recursive:
+            break
