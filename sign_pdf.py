@@ -7,11 +7,15 @@ from PDFNetPython3.PDFNetPython import *
 from typing import Tuple
 
 # Creates a public/private key pair
+
+
 def createKeyPair(type, bits):
     pkey = OpenSSL.crypto.PKey()
     pkey.generate_key(type, bits)
     return pkey
 # Create a self signed certificate
+
+
 def create_self_signed_cert(pKey):
     cert = OpenSSL.crypto.X509()
     cert.get_subject().CN = "NAUFAL ALIF"
@@ -22,6 +26,8 @@ def create_self_signed_cert(pKey):
     cert.set_pubkey(pKey)
     cert.sign(pKey, 'md5')
     return cert
+
+
 def load():
     summary = {}
     summary['OpenSSL Version'] = OpenSSL.__version__
@@ -59,4 +65,54 @@ def load():
     print("## Initialization Summary ##################################################")
     print("\n".join("{}:{}".format(i, j) for i, j in summary.items()))
     print("############################################################################")
+    return True
+
+# Sign a PDF file
+
+
+def sign_file(input_file: str, signatureID: str, x_coordinate: int,
+              y_coordinate: int, pages: Tuple = None, output_file: str = None
+              ):
+    if not output_file:
+        output_file = (os.path.splitext(input_file)[0]) + "_signed.pdf"
+    # Initialize the library
+    PDFNet.Initialize(
+        "demo:1684297163994:7da82d7103000000006dd30816cc050abdf7307a6c82ac748fa68c7040")
+    doc = PDFDoc(input_file)
+    # Create a signature field
+    sigField = SignatureWidget.Create(doc, Rect(
+        x_coordinate, y_coordinate, x_coordinate+100, y_coordinate+50), signatureID)
+    # Iterate throughout document pages
+    for page in range(1, (doc.GetPageCount() + 1)):
+        if pages:
+            if str(page) not in pages:
+                continue
+        pg = doc.GetPage(page)
+        pg.AnnotPushBack(sigField)
+    # Signature image
+    sign_filename = os.path.dirname(
+        os.path.abspath(__file__)) + "\signpdf\signature.jpg"
+    # Self signed certificate
+    pk_filename = os.path.dirname(
+        os.path.abspath(__file__)) + "\signpdf\container.pfx"
+    # Retrieve the signature field.
+    approval_field = doc.GetField(signatureID)
+    approval_signature_digsig_field = DigitalSignatureField(approval_field)
+    # Add appearance to the signature field.
+    img = Image.Create(doc.GetSDFDoc(), sign_filename)
+    found_approval_signature_widget = SignatureWidget(
+        approval_field.GetSDFObj())
+    found_approval_signature_widget.CreateSignatureAppearance(img)
+    approval_signature_digsig_field.SignOnNextSave(pk_filename, '')
+    doc.Save(output_file, SDFDoc.e_incremental)
+    # Develop a Process Summary
+    summary = {
+        "Input File": input_file, "Signature ID": signatureID,
+        "Output File": output_file, "Signature File": sign_filename,
+        "Certificate File": pk_filename
+    }
+    # Printing Summary
+    print("## Summary ########################################################")
+    print("\n".join("{}:{}".format(i, j) for i, j in summary.items()))
+    print("###################################################################")
     return True
