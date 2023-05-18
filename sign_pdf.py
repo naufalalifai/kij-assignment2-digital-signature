@@ -185,3 +185,26 @@ def parse_args():
     print("\n".join("{}:{}".format(i, j) for i, j in args.items()))
     print("######################################################################")
     return args
+
+
+# Main function
+if __name__ == '__main__':
+    # Parsing command line arguments entered by user
+    args = parse_args()
+    if args['load'] == True:
+        load()
+    else:
+        # If File Path
+        if os.path.isfile(args['input_path']):
+            sign_file(
+                input_file=args['input_path'], signatureID=args['signatureID'],
+                x_coordinate=int(args['x_coordinate']), y_coordinate=int(args['y_coordinate']),
+                pages=args['pages'], output_file=args['output_file']
+            )
+        # If Folder Path
+        elif os.path.isdir(args['input_path']):
+            sign_folder(
+                input_folder=args['input_path'], signatureID=args['signatureID'],
+                x_coordinate=int(args['x_coordinate']), y_coordinate=int(args['y_coordinate']),
+                pages=args['pages'], recursive=args['recursive']
+            )
