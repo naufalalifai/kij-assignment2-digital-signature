@@ -142,3 +142,16 @@ def sign_folder(**kwargs):
                       y_coordinate=y_coordinate, pages=pages, output_file=None)
         if not recursive:
             break
+
+# Validates the path inputted and checks whether it is a file path or a folder path
+
+
+def is_valid_path(path):
+    if not path:
+        raise ValueError(f"Invalid Path")
+    if os.path.isfile(path):
+        return path
+    elif os.path.isdir(path):
+        return path
+    else:
+        raise ValueError(f"Invalid Path {path}")
