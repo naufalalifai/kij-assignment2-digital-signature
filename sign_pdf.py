@@ -155,3 +155,33 @@ def is_valid_path(path):
         return path
     else:
         raise ValueError(f"Invalid Path {path}")
+
+
+# Parsing command-line arguments
+def parse_args():
+    parser = argparse.ArgumentParser(description="Available Options")
+    parser.add_argument('-l', '--load', dest='load', action="store_true",
+                        help="Load the required configurations and create the certificate")
+    parser.add_argument('-i', '--input_path', dest='input_path', type=is_valid_path,
+                        help="Enter the path of the file or the folder to process")
+    parser.add_argument('-s', '--signatureID', dest='signatureID',
+                        type=str, help="Enter the ID of the signature")
+    parser.add_argument('-p', '--pages', dest='pages', type=tuple,
+                        help="Enter the pages to consider e.g.: [1,3]")
+    parser.add_argument('-x', '--x_coordinate', dest='x_coordinate',
+                        type=int, help="Enter the x coordinate.")
+    parser.add_argument('-y', '--y_coordinate', dest='y_coordinate',
+                        type=int, help="Enter the y coordinate.")
+    path = parser.parse_known_args()[0].input_path
+    if path and os.path.isfile(path):
+        parser.add_argument('-o', '--output_file', dest='output_file',
+                            type=str, help="Enter a valid output file")
+    if path and os.path.isdir(path):
+        parser.add_argument('-r', '--recursive', dest='recursive', default=False, type=lambda x: (
+            str(x).lower() in ['true', '1', 'yes']), help="Process Recursively or Non-Recursively")
+    args = vars(parser.parse_args())
+    # To Display The Command Line Arguments
+    print("## Command Arguments #################################################")
+    print("\n".join("{}:{}".format(i, j) for i, j in args.items()))
+    print("######################################################################")
+    return args
